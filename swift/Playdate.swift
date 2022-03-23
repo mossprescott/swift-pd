@@ -1,7 +1,7 @@
 @_cdecl("eventHandler")
 public func eventHandler(_ playdate: PlaydateAPI, _ event: PDSystemEvent, _ arg: Int32) -> Int32 {
     if event == kEventInit {
-        Playdate.playdate = playdate
+        Playdate.c_api = playdate
 
         setup()
 
@@ -24,22 +24,22 @@ enum Color: UInt {
 
 /// Just a namespace for Playdate API wrappers to live in.
 enum Playdate {
-    fileprivate static var playdate: PlaydateAPI!
+    static var c_api: PlaydateAPI!
 
     enum System {
         static func drawFPS(x: Int, y: Int) {
-            playdate.system.pointee.drawFPS(Int32(x), Int32(y))
+            c_api.system.pointee.drawFPS(Int32(x), Int32(y))
         }
     }
 
     enum Graphics {
         static func clear(_ color: Color) {
-            playdate.graphics.pointee.clear(color.rawValue)
+            c_api.graphics.pointee.clear(color.rawValue)
         }
 
         @discardableResult
         static func drawText(_ message: String, x: Int, y: Int) -> Int {
-            return Int(playdate.graphics.pointee.drawText(message, message.count, kUTF8Encoding,
+            return Int(c_api.graphics.pointee.drawText(message, message.count, kUTF8Encoding,
                         Int32(x), Int32(y)))
         }
     }
