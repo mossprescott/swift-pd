@@ -8,11 +8,13 @@ APP="HelloWorld"
 touch Source/pdex.bin
 pdc Source "$APP"
 
+# Delete Swift sources from the binary:
+rm "$APP.pdx"/*.swift
+
 swiftc \
     -import-objc-header swift/Playdate-Bridging-Header.h \
     -I "$SDK" \
-    Source/main.swift \
+    Source/*.swift \
     swift/Playdate.swift \
-    -emit-module \
     -emit-library \
     -o "$APP.pdx/pdex.dylib"
