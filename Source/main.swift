@@ -20,17 +20,17 @@ func update() -> Bool {
     Playdate.Graphics.drawText("Hello World!", x: x, y: y)
 
     x += dx
-	y += dy
+    y += dy
 
-	if x < 0 || x > Int(LCD_COLUMNS) - TEXT_WIDTH {
+    if x < 0 || x > Int(LCD_COLUMNS) - TEXT_WIDTH {
         dx = -dx
     }
 
-	if y < 0 || y > Int(LCD_ROWS) - TEXT_HEIGHT {
-		dy = -dy
+    if y < 0 || y > Int(LCD_ROWS) - TEXT_HEIGHT {
+        dy = -dy
     }
 
-	Playdate.System.drawFPS(x: 0, y: 0)
+    Playdate.System.drawFPS(x: 0, y: 0)
 
-	return true;
+    return true;
 }
