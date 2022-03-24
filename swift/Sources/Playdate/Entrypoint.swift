@@ -6,9 +6,14 @@ public func eventHandler(_ playdate: PlaydateAPI, _ event: PDSystemEvent, _ arg:
     case kEventInit:
         Playdate.c_api = playdate
 
-        appInstance = makeApp()
+        do {
+            appInstance = try makeApp()
 
-        playdate.system.pointee.setUpdateCallback(updateCallback, nil)
+            playdate.system.pointee.setUpdateCallback(updateCallback, nil)
+        }
+        catch let err {
+            Playdate.System.error("could not create the app: \(err)")
+        }
 
     default:
         // TODO: pass all other events on to the App object
@@ -27,7 +32,7 @@ private func updateCallback(_: UnsafeMutableRawPointer?) -> Int32 {
 ///    func myApp() {
 ///        MyApp()
 ///    }
-dynamic public func makeApp() -> App {
+dynamic public func makeApp() throws -> App {
     fatalError("makeApp() replacement needed")
 }
 
