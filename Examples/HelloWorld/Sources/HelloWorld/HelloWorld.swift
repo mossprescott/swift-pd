@@ -8,14 +8,14 @@ var y = (240-TEXT_HEIGHT)/2
 var dx = 1
 var dy = 2
 
-var font: Font!
+var font: Graphics.Font!
 
 class HelloWorld: App {
     /// Called once when the app is loaded, before the first call to update().
     /// You can put code to do any one-time setup here.
     init() {
         do {
-            font = try Playdate.Graphics.loadFont("/System/Fonts/Asheville-Sans-14-Bold.pft")
+            font = try Graphics.Font(path: "/System/Fonts/Asheville-Sans-14-Bold.pft")
         } catch {
             Playdate.System.error("\(error)")
         }
@@ -24,10 +24,10 @@ class HelloWorld: App {
     /// Called once per frame to consume input and draw to the screen. If anything was drawn and the
     /// screen needs to be updated by the sytem, return true.
     func update() -> Bool {
-        Playdate.Graphics.clear(.white)
+        Graphics.clear(.white)
 
-        Playdate.Graphics.setFont(font)
-        Playdate.Graphics.drawText("Hello World!", x: x, y: y)
+        Graphics.setFont(font)
+        Graphics.drawText("Hello World!", x: x, y: y)
 
         x += dx
         y += dy

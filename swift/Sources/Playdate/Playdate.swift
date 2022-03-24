@@ -1,27 +1,5 @@
 import CPlaydate
 
-/// Warning: these have to mirror the values in the C type
-public enum Color: UInt {
-    case black
-    case white
-    case clear
-    case xor
-    // case pattern(<pointer to 16 bytes containing pixels>)
-}
-
-public class Font {
-    var c_font: OpaquePointer?
-
-    init(_ font: OpaquePointer?) {
-        self.c_font = font
-    }
-
-    // TODO: Do Fonts need to be freed? it's unclear from the docs
-    // deinit {
-
-    // }
-}
-
 enum RuntimeError: Error {
     case FontNotLoaded(String)
 }
@@ -52,31 +30,10 @@ public enum Playdate {
             c_api.system.pointee.drawFPS(Int32(x), Int32(y))
         }
     }
+}
 
-    public enum Graphics {
-        public static func clear(_ color: Color) {
-            c_api.graphics.pointee.clear(color.rawValue)
-        }
-
-        public static func drawText(_ message: String, x: Int, y: Int) {
-            let _ = c_api.graphics.pointee.drawText(message, message.count, kUTF8Encoding,
-                        Int32(x), Int32(y))
-        }
-
-        public static func loadFont(_ path: String) throws -> Font {
-            // var err: UnsafeMutablePointer<UnsafePointer<CChar>?> = UnsafeMutablePointer(0)
-            var err: UnsafePointer<CChar>? = nil
-            let ptr = c_api.graphics.pointee.loadFont(path, &err)
-            if let err = err {
-                throw RuntimeError.FontNotLoaded(String(cString: err))
-            }
-            else {
-                return Font(ptr)
-            }
-        }
-
-        public static func setFont(_ font: Font) {
-            c_api.graphics.pointee.setFont(font.c_font)
-        }
+func checkError(_ err: UnsafePointer<CChar>?) throws {
+    if let err = err {
+        throw RuntimeError.FontNotLoaded(String(cString: err))
     }
 }
