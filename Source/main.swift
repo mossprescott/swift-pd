@@ -6,17 +6,24 @@ var y = (240-TEXT_HEIGHT)/2
 var dx = 1
 var dy = 2
 
+var font: Font!
+
 /// Called once when the app is loaded, before the first call to update().
 /// You can put code to do any one-time setup here.
 func setup() {
-    // font = Playdate.Graphics.loadFont(fontpath, &err);
+    do {
+        font = try Playdate.Graphics.loadFont("/System/Fonts/Asheville-Sans-14-Bold.pft")
+    } catch {
+        Playdate.System.error("\(error)")
+    }
 }
 
 /// Called once per frame to consume input and draw to the screen. If anything was drawn and the
 /// screen needs to be updated by the sytem, return true.
 func update() -> Bool {
     Playdate.Graphics.clear(.white)
-    // Playdate.Graphics.setFont(font)
+
+    Playdate.Graphics.setFont(font)
     Playdate.Graphics.drawText("Hello World!", x: x, y: y)
 
     x += dx
