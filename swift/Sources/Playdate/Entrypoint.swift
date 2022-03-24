@@ -11,13 +11,16 @@ public func eventHandler(_ playdate: PlaydateAPI, _ event: PDSystemEvent, _ arg:
 
             playdate.system.pointee.setUpdateCallback(updateCallback, nil)
         }
+        catch RuntimeError.msg(let msg) {
+            System.error("could not create the app: \(msg)")
+        }
         catch let err {
-            Playdate.System.error("could not create the app: \(err)")
+            System.error("could not create the app: \(err)")
         }
 
     default:
         // TODO: pass all other events on to the App object
-        Playdate.System.logToConsole("unhandled event: \(event)")
+        System.logToConsole("unhandled event: \(event)")
     }
 
     return 0
@@ -60,7 +63,7 @@ public protocol App {
 
     /// Called once per frame to consume input and draw to the screen. If anything was drawn and the
     /// screen needs to be updated by the sytem, return true.
-    func update() -> Bool
+    mutating func update() -> Bool
 }
 
 /// Default, no-op implementations for everything except `update()`.

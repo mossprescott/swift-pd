@@ -47,6 +47,6 @@ class HelloWorld: App {
 }
 
 @_dynamicReplacement(for: makeApp())
-func myApp() -> App {
+func myApp() throws -> App {
     HelloWorld()
 }
