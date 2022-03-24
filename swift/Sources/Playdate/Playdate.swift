@@ -1,20 +1,7 @@
-@_cdecl("eventHandler")
-public func eventHandler(_ playdate: PlaydateAPI, _ event: PDSystemEvent, _ arg: Int32) -> Int32 {
-    if event == kEventInit {
-        Playdate.c_api = playdate
+import CPlaydate
 
-        setup()
-
-        playdate.system.pointee.setUpdateCallback(updateCallback, nil)
-    }
-    return 0
-}
-
-private func updateCallback(_: UnsafeMutableRawPointer?) -> Int32 {
-    return update() ? 1 : 0
-}
-
-enum Color: UInt {
+/// Warning: these have to mirror the values in the C type
+public enum Color: UInt {
     case black
     case white
     case clear
@@ -22,7 +9,7 @@ enum Color: UInt {
     // case pattern(<pointer to 16 bytes containing pixels>)
 }
 
-class Font {
+public class Font {
     var c_font: OpaquePointer?
 
     init(_ font: OpaquePointer?) {
@@ -40,43 +27,43 @@ enum RuntimeError: Error {
 }
 
 /// Just a namespace for Playdate API wrappers to live in.
-enum Playdate {
+public enum Playdate {
     static var c_api: PlaydateAPI!
 
-    enum System {
+    public enum System {
         /// See https://sdk.play.date/1.9.3/Inside%20Playdate%20with%20C.html#f-system.error
         ///
         /// Limitations: `message` should contain only ASCII characters, with no formatting.
         /// Use Swift string interpolation to construct strings.
-        static func error(_ message: String) {
-            invokePrintf(c_api.system.pointee.error, message)
+        public static func error(_ message: String) {
+            _error0(withUnsafeMutablePointer(to: &c_api) { $0 }, message)
         }
 
         /// See https://sdk.play.date/1.9.3/Inside%20Playdate%20with%20C.html#f-system.logToConsole
         ///
         /// Limitations: `message` should contain only ASCII characters, with no formatting.
         /// Use Swift string interpolation to construct strings.
-        static func logToConsole(_ message: String) {
-            invokePrintf(c_api.system.pointee.logToConsole, message)
+        public static func logToConsole(_ message: String) {
+            // invokePrintf(c_api.system.pointee.logToConsole, message)
+            _logToConsole0(withUnsafeMutablePointer(to: &c_api) { $0 }, message)
         }
 
-        static func drawFPS(x: Int, y: Int) {
+        public static func drawFPS(x: Int, y: Int) {
             c_api.system.pointee.drawFPS(Int32(x), Int32(y))
         }
     }
 
-    enum Graphics {
-        static func clear(_ color: Color) {
+    public enum Graphics {
+        public static func clear(_ color: Color) {
             c_api.graphics.pointee.clear(color.rawValue)
         }
 
-        @discardableResult
-        static func drawText(_ message: String, x: Int, y: Int) -> Int {
-            return Int(c_api.graphics.pointee.drawText(message, message.count, kUTF8Encoding,
-                        Int32(x), Int32(y)))
+        public static func drawText(_ message: String, x: Int, y: Int) {
+            let _ = c_api.graphics.pointee.drawText(message, message.count, kUTF8Encoding,
+                        Int32(x), Int32(y))
         }
 
-        static func loadFont(_ path: String) throws -> Font {
+        public static func loadFont(_ path: String) throws -> Font {
             // var err: UnsafeMutablePointer<UnsafePointer<CChar>?> = UnsafeMutablePointer(0)
             var err: UnsafePointer<CChar>? = nil
             let ptr = c_api.graphics.pointee.loadFont(path, &err)
@@ -88,7 +75,7 @@ enum Playdate {
             }
         }
 
-        static func setFont(_ font: Font) {
+        public static func setFont(_ font: Font) {
             c_api.graphics.pointee.setFont(font.c_font)
         }
     }

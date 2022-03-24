@@ -1,2 +1,4 @@
-HelloWorld.pdx
-Source/pdex.bin
+/swift/Sources/CPlaydate/pd_api.h
+/swift/Sources/CPlaydate/pd_api
+.build
+*.pdx

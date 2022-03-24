@@ -1,0 +1,4 @@
+module CPlaydate {
+    header "Playdate-Bridging-Header.h"
+    export *
+}
