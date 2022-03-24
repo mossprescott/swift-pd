@@ -1,0 +1,5 @@
+name=Sprite Game
+author=Moss Prescott
+description=It's not much of a game! (originally by Panic, Inc)
+bundleID=com.example.sprite
+imagePath=
