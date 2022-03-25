@@ -26,7 +26,7 @@ enum Bullet {
         bullet.zIndex = 999
         Sprite.add(bullet)
 
-        bullet.tag = SpriteType.playerBullet.rawValue
+        bullet.tag = SpriteType.bullet.rawValue
     }
 
     /// "updatePlayerFire"
@@ -34,7 +34,7 @@ enum Bullet {
         let (x, y) = bullet.position
         let newY = y - 20
 
-        if let h = bullet.getImage()?.height, newY < Float(-h) {
+        if let h = bullet.getImage()?.height, newY < Float(-h) {  // bullet is offscreen, remove it
             Sprite.remove(bullet)
         }
         else {
@@ -43,7 +43,7 @@ enum Bullet {
             var hit = false
             for c in collisions {
                 let type = SpriteType(rawValue: c.other.tag)
-                if type == .enemyPlane {
+                if type == .enemy {
                     EnemyPlane.destroy(c.other)
                     hit = true
                     hitEnemyCallback()

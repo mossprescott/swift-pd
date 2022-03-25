@@ -1,6 +1,6 @@
 import Playdate
 
-/// Manage the large planes that blunder in and helplessly wait to be shot down or bumnped into.
+/// Manage the large planes that blunder in and helplessly wait to be shot down or bumped into.
 /// Note, there's no state aside from the actual Sprite, so no instances of EnemyPlane.
 enum EnemyPlane {
     /// "createEnemyPlane"
@@ -27,7 +27,7 @@ enum EnemyPlane {
         plane.zIndex = 500
         Sprite.add(plane)
 
-        plane.tag = SpriteType.enemyPlane.rawValue
+        plane.tag = SpriteType.enemy.rawValue
     }
 
     /// "updateEnemyPlane"

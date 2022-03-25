@@ -30,49 +30,9 @@ class SpriteGame: App {
             self.enemyCount -= 1
         }
 
+        // Note: for the time being, all the images are being re-loaded constantly. Think of it as
+        // a way of stress-testing memory management of Bitmaps and Sprites.
         // preloadImages()
-    }
-
-    private func spawnEnemyIfNeeded() {
-        if enemyCount < maxEnemies {
-            if Int.random(in: 0 ..< 120/maxEnemies) == 0 {
-                EnemyPlane.spawn { self.enemyCount -= 1 }
-                enemyCount += 1
-            }
-        }
-    }
-
-    private func spawnBackgroundPlaneIfNeeded() {
-        if backgroundPlaneCount < maxBackgroundPlanes {
-            if Int.random(in: 0 ..< 120/maxBackgroundPlanes) == 0 {
-                BackgroundPlane.spawn { self.backgroundPlaneCount -= 1 }
-                backgroundPlaneCount += 1
-            }
-        }
-    }
-
-    // cranking the crank changes the maximum number of enemy planes allowed
-    private func checkCrank() {
-        let change = System.getCrankChange()
-
-        if change > 1 {
-            maxEnemies += 1;
-            if maxEnemies > 119 { maxEnemies = 119 }
-            System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
-        }
-        else if change < -1  {
-            maxEnemies -= 1;
-            if maxEnemies < 0 { maxEnemies = 0 }
-            System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
-        }
-    }
-
-    private func checkButtons() {
-        let buttons = System.getButtonState()
-        // Note: modified from the original; B for continuous fire
-        if buttons.pushed.contains(.a) || buttons.current.contains(.b) {
-            player.fire();
-        }
     }
 
     func update() -> Bool {
@@ -96,12 +56,54 @@ class SpriteGame: App {
 
         return true
     }
+
+    private func checkButtons() {
+        let buttons = System.getButtonState()
+        // Note: modified from the original; B for continuous fire
+        if buttons.pushed.contains(.a) || buttons.current.contains(.b) {
+            player.fire();
+        }
+    }
+
+    // cranking the crank changes the maximum number of enemy planes allowed
+    private func checkCrank() {
+        let change = System.getCrankChange()
+
+        if change > 1 {
+            maxEnemies += 1;
+            if maxEnemies > 119 { maxEnemies = 119 }
+            System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
+        }
+        else if change < -1  {
+            maxEnemies -= 1;
+            if maxEnemies < 0 { maxEnemies = 0 }
+            System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
+        }
+    }
+
+    private func spawnEnemyIfNeeded() {
+        if enemyCount < maxEnemies {
+            if Int.random(in: 0 ..< 120/maxEnemies) == 0 {
+                EnemyPlane.spawn { self.enemyCount -= 1 }
+                enemyCount += 1
+            }
+        }
+    }
+
+    private func spawnBackgroundPlaneIfNeeded() {
+        if backgroundPlaneCount < maxBackgroundPlanes {
+            if Int.random(in: 0 ..< 120/maxBackgroundPlanes) == 0 {
+                BackgroundPlane.spawn { self.backgroundPlaneCount -= 1 }
+                backgroundPlaneCount += 1
+            }
+        }
+    }
 }
 
 enum SpriteType: UInt8 {
     case player = 1
-    case playerBullet
-    case enemyPlane
+    case bullet
+    case enemy
 }
 
 @_dynamicReplacement(for: makeApp())

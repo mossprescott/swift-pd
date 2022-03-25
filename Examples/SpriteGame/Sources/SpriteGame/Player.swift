@@ -49,7 +49,7 @@ class Player {
         let (_, _, collisions) = plane.moveWithCollisions(goalX: x + Float(dx), goalY: y + Float(dy))
         for c in collisions {
             let type = SpriteType(rawValue: c.other.tag)
-            if type == .enemyPlane {
+            if type == .enemy {
                 EnemyPlane.destroy(c.other)
                 collidedWithEnemyCallback?()
             }
