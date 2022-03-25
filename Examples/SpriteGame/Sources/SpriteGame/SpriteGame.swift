@@ -3,33 +3,52 @@ import Playdate
 class SpriteGame: App {
     let maxBackgroundPlanes = 10
 
-    var maxEnemies = 10
+    var score = 0
     var backgroundPlaneCount = 0
+    var maxEnemies = 10
+    var enemyCount = 0
+
     let player: Player
 
     /// "setupGame()"
     init() throws {
-        //srand(secondsSincedEpoch)
+        // Note: no need to seed Swift's SystemRandomNumberGenerator
 
         try Background.setup()
 
         player = try Player(centerX: 200, centerY: 180)
         backgroundPlaneCount += 1
 
+        // Note: to avoid a reference circularity, we wait until this instance is initialized, then
+        // wire the callbacks.
+        player.collidedWithEnemyCallback = {
+            self.score -= 1
+            self.enemyCount -= 1
+        }
+        player.downedEnemyCallback = {
+            self.score += 1
+            self.enemyCount -= 1
+        }
+
         // preloadImages()
+    }
+
+    private func spawnEnemyIfNeeded() {
+        if enemyCount < maxEnemies {
+            if Int.random(in: 0 ..< 120/maxEnemies) == 0 {
+                EnemyPlane.spawn { self.enemyCount -= 1 }
+                enemyCount += 1
+            }
+        }
     }
 
     private func spawnBackgroundPlaneIfNeeded() {
         if backgroundPlaneCount < maxBackgroundPlanes {
             if Int.random(in: 0 ..< 120/maxBackgroundPlanes) == 0 {
-                BackgroundPlane.spawn { self.backgroundPlaneDeparted() }
+                BackgroundPlane.spawn { self.backgroundPlaneCount -= 1 }
                 backgroundPlaneCount += 1
             }
         }
-    }
-
-    private func backgroundPlaneDeparted() {
-         backgroundPlaneCount -= 1
     }
 
     // cranking the crank changes the maximum number of enemy planes allowed
@@ -60,13 +79,20 @@ class SpriteGame: App {
         checkButtons()
         checkCrank()
 
-        // spawnEnemyIfNeeded()
+        spawnEnemyIfNeeded()
         spawnBackgroundPlaneIfNeeded()
         Sprite.updateAndDrawSprites()
 
-        // System.logToConsole("sprites: \(Sprite.getCount())")
-
         Playdate.System.drawFPS(x: 0, y: 0)
+
+        // Note: modified from the original; display the score at all times, using the helpfully
+        // included font.
+        guard let font = try? Graphics.Font(path: "fonts/namco") else {
+            // TODO: preload
+            fatalError("no font")
+        }
+        Graphics.setFont(font)
+        Graphics.drawText("Score: \(score)", x: 5, y: 225)
 
         return true
     }

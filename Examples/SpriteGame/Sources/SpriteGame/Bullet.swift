@@ -4,10 +4,10 @@ import Playdate
 /// Sprite, so no instances of Bullet.
 enum Bullet {
     /// "playerFire"
-    static func spawn(x: Float, y: Float) {
+    static func spawn(x: Float, y: Float, hitEnemyCallback: @escaping () -> Void) {
         let bullet = Sprite()
 
-        bullet.setUpdateFunction(update)
+        bullet.setUpdateFunction { sprite in update(sprite, hitEnemyCallback) }
 
         // TODO: preload
         guard let bulletImage = try? Graphics.Bitmap(path: "images/doubleBullet") else {
@@ -20,10 +20,9 @@ enum Bullet {
         bullet.setImage(bulletImage)
 
         bullet.collideRect = Rect(x: 0, y: 0, width: Float(w), height: Float(bulletHeight))
+        bullet.setCollisionResponseFunction { _, _ in .overlap }
 
-        // pd->sprite->setCollisionResponseFunction(bullet, playerFireCollisionResponse);
-
-        bullet.moveTo(x: x - Float(w)/2, y: y)
+        bullet.moveTo(x: x, y: y)  // Note: the original example has a bug here that makes the bullets misaligned
         bullet.zIndex = 999
         Sprite.add(bullet)
 
@@ -31,7 +30,7 @@ enum Bullet {
     }
 
     /// "updatePlayerFire"
-    static func update(bullet: Sprite) {
+    private static func update(_ bullet: Sprite, _ hitEnemyCallback: @escaping () -> Void) {
         let (x, y) = bullet.position
         let newY = y - 20
 
@@ -39,9 +38,23 @@ enum Bullet {
             Sprite.remove(bullet)
         }
         else {
-            bullet.moveTo(x: x, y: newY)  // TODO moveWithCollisions
+            let (_, _, collisions) = bullet.moveWithCollisions(goalX: x, goalY: newY)
 
-            // ...
+            var hit = false
+            for c in collisions {
+                let type = SpriteType(rawValue: c.other.tag)
+                if type == .enemyPlane {
+                    EnemyPlane.destroy(c.other)
+                    hit = true
+                    hitEnemyCallback()
+                }
+            }
+
+            if hit {
+                Sprite.remove(bullet)
+            }
+
+            // Note: no need to free the collision info; Swift takes care of it
         }
     }
 }

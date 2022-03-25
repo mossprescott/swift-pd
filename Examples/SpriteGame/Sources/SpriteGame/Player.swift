@@ -2,6 +2,8 @@ import Playdate
 
 class Player {
     let plane: Sprite
+    var collidedWithEnemyCallback: (() -> Void)?
+    var downedEnemyCallback: (() -> Void)?
 
     init(centerX: Float, centerY: Float) throws {
         plane = Sprite()
@@ -12,7 +14,7 @@ class Player {
         plane.setImage(planeImage)
 
         plane.collideRect = Rect(x: 5, y: 5, width: Float(planeImage.width-10), height: Float(planeImage.height-10))
-        // plane.setCollisionResponseFunction()
+        plane.setCollisionResponseFunction { _, _ in .overlap }
 
         plane.moveTo(x: centerX, y: centerY)
 
@@ -42,17 +44,22 @@ class Player {
             dx = 4
         }
 
-        // Note: the C version doesn't bother with this test
-        if dx != 0 || dy != 0 {
-            let (x, y) = plane.position
+        let (x, y) = plane.position
 
-            // TODO: moveWithCollisions
-            plane.moveTo(x: x + Float(dx), y: y + Float(dy))
+        let (_, _, collisions) = plane.moveWithCollisions(goalX: x + Float(dx), goalY: y + Float(dy))
+        for c in collisions {
+            let type = SpriteType(rawValue: c.other.tag)
+            if type == .enemyPlane {
+                EnemyPlane.destroy(c.other)
+                collidedWithEnemyCallback?()
+            }
         }
+
+        // Note: no need to free the collision info; Swift takes care of it
     }
 
     func fire() {
         let bounds = plane.bounds
-        Bullet.spawn(x: bounds.x + bounds.width/2, y: bounds.y)
+        Bullet.spawn(x: bounds.x + bounds.width/2, y: bounds.y, hitEnemyCallback: downedEnemyCallback ?? {()})
     }
 }
