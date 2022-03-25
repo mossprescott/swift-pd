@@ -1,6 +1,8 @@
 import Playdate
 
-struct SpriteGame: App {
+class SpriteGame: App {
+    let maxBackgroundPlanes = 10
+
     var maxEnemies = 10
     var backgroundPlaneCount = 0
     let player: Player
@@ -17,8 +19,21 @@ struct SpriteGame: App {
         // preloadImages()
     }
 
+    private func spawnBackgroundPlaneIfNeeded() {
+        if backgroundPlaneCount < maxBackgroundPlanes {
+            if Int.random(in: 0 ..< 120/maxBackgroundPlanes) == 0 {
+                BackgroundPlane.spawn { self.backgroundPlaneDeparted() }
+                backgroundPlaneCount += 1
+            }
+        }
+    }
+
+    private func backgroundPlaneDeparted() {
+         backgroundPlaneCount -= 1
+    }
+
     // cranking the crank changes the maximum number of enemy planes allowed
-    mutating func checkCrank() {
+    private func checkCrank() {
         let change = System.getCrankChange()
 
         if change > 1 {
@@ -33,7 +48,7 @@ struct SpriteGame: App {
         }
     }
 
-    func checkButtons() {
+    private func checkButtons() {
         let buttons = System.getButtonState()
         // Note: modified from the original; B for continuous fire
         if buttons.pushed.contains(.a) || buttons.current.contains(.b) {
@@ -41,12 +56,12 @@ struct SpriteGame: App {
         }
     }
 
-    mutating func update() -> Bool {
+    func update() -> Bool {
         checkButtons()
         checkCrank()
 
         // spawnEnemyIfNeeded()
-        // spawnBackgroundPlaneIfNeeded()
+        spawnBackgroundPlaneIfNeeded()
         Sprite.updateAndDrawSprites()
 
         // System.logToConsole("sprites: \(Sprite.getCount())")
