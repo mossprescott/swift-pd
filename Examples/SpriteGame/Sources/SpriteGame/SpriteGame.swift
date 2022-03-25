@@ -2,6 +2,8 @@ import Playdate
 
 struct SpriteGame: App {
     var maxEnemies = 10
+    var backgroundPlaneCount = 0
+    let player: Player
 
     /// "setupGame()"
     init() throws {
@@ -9,7 +11,9 @@ struct SpriteGame: App {
 
         try Background.setup()
 
-        // player = createPlayer(200, 180)
+        player = try Player(centerX: 200, centerY: 180)
+        backgroundPlaneCount += 1
+
         // preloadImages()
     }
 
@@ -32,16 +36,11 @@ struct SpriteGame: App {
     func checkButtons() {
     	let buttons = System.getButtonState()
     	if buttons.pushed.contains(.a) || buttons.pushed.contains(.b) {
-    		// playerFire();
-            System.logToConsole("fire!")
+    		player.fire();
     	}
     }
 
     mutating func update() -> Bool {
-        Playdate.System.drawFPS(x: 0, y: 0)
-
-        // checkButtons()
-        // checkCrank()
         checkButtons()
         checkCrank()
 
@@ -49,11 +48,18 @@ struct SpriteGame: App {
         // spawnBackgroundPlaneIfNeeded()
         Sprite.updateAndDrawSprites()
 
-        // background.image.draw(x: 0, y: 0)
-        // background.draw()
+        // System.logToConsole("sprites: \(Sprite.getCount())")
+
+        Playdate.System.drawFPS(x: 0, y: 0)
 
         return true
     }
+}
+
+enum SpriteType: UInt8 {
+    case player = 1
+    case playerBullet
+    case enemyPlane
 }
 
 @_dynamicReplacement(for: makeApp())
