@@ -1,4 +1,4 @@
-/swift/Sources/CPlaydate/pd_api.h
-/swift/Sources/CPlaydate/pd_api
+/swift-pd/Sources/CPlaydate/pd_api.h
+/swift-pd/Sources/CPlaydate/pd_api
 .build
 *.pdx
