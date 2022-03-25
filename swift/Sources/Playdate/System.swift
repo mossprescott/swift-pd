@@ -21,6 +21,13 @@ public enum System {
         Playdate.c_api.system.pointee
     }
 
+    /// This is private to the module, because it's only needed for certain objects that are
+    /// allocated by the API. User-level allocation will be through Swift's own memory management,
+    /// even (theoretically) on-device.
+    static func realloc(ptr: UnsafeMutableRawPointer?, size: Int) -> UnsafeMutableRawPointer? {
+        return c_sys.realloc(ptr, size)
+    }
+
     /// See https://sdk.play.date/1.9.3/Inside%20Playdate%20with%20C.html#f-system.error
     ///
     /// Limitations: `message` should contain only ASCII characters, with no formatting.

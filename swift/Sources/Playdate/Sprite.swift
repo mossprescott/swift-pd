@@ -26,7 +26,7 @@ public struct Rect {
 /// to manipulate the sprite's state (if you choose to use it that way.) So maybe there's no
 /// point trying to hide it.
 public class Sprite {
-    private static var c_sprite: playdate_sprite {
+    static var c_sprite: playdate_sprite {
         Playdate.c_api.sprite.pointee
     }
 
@@ -34,13 +34,14 @@ public class Sprite {
     /// become garbage.
     private static var displayList: Set<Sprite> = Set()
 
-    private let c_ptr: OpaquePointer?
+    let c_ptr: OpaquePointer?
 
     // Tricky: C function pointers are a drag. When a callback in installed, we actually set a generic
     // wrapper via the API, which uses `userdata` to get a handle to the (Swift) Sprite instance, then
     // calls through to one of these functions.
     fileprivate var updateFunction: (Sprite) -> Void = { _ in ()}
     fileprivate var drawFunction: (Sprite, Rect, Rect) -> Void = { _, _, _ in () }
+    fileprivate var collisionResponseFunction: SpriteCollisionFilterProc? = nil
 
     /// Retain a reference to the Swift Bitmap, so it won't become garbage.
     private var image: Graphics.Bitmap? = nil
@@ -70,9 +71,24 @@ public class Sprite {
         Sprite.c_sprite.moveBy(c_ptr, dx, dy)
     }
 
+    /// Warning: once a Bitmap has been associated with a Sprite, it might or might not be safe to
+    /// use the Bitmap elsewhere. More research is needed.
     public func setImage(_ image: Graphics.Bitmap, flip: Flip = .unflipped) {
-        self.image = image
+        // Tricky: it looks like the C sprite takes ownership of the bitmap, and will free it when
+        // necessary (e.g when the sprite itself is freed or when a new image is set.) But our
+        // Swift wrapper is also going to free the Bitmap as soon as the reference here is
+        // pointed to a new object. Therefore we do some hackish manual refcount updating.
+        // This is probably not the approved technique.
+        // At best, this is leaking the (Swift) Bitmap instance that's still holding onto a
+        // pointer to the (C) Bitmap that will eventually be freed out from under it.
+        // Worse, if someone else still has a reference to the (Swift) Bitmap and tries to
+        // use it, is it already freed underneath?
+        // At a minimum, maybe need to release the old image when a new one arrives?
+        let _ = Unmanaged.passRetained(image)
+
         Sprite.c_sprite.setImage(c_ptr, image.c_bitmap, LCDBitmapFlip(flip.rawValue))
+
+        self.image = image
     }
 
     /// Might as well expose this, since we're holding onto it in order to keep it from being
@@ -125,6 +141,11 @@ public class Sprite {
         Sprite.c_sprite.setDrawFunction(c_ptr, drawGlue)
     }
 
+    public func setCollisionResponseFunction(_ f: SpriteCollisionFilterProc?) {
+        collisionResponseFunction = f
+        Sprite.c_sprite.setCollisionResponseFunction(c_ptr, collisionResponseGlue)
+    }
+
     public var position: (x: Float, y: Float) {
         var x: Float = 0
         var y: Float = 0
@@ -167,10 +188,11 @@ public class Sprite {
     }
 
     // Recover a reference to the (Swift) instance from userdata.
-    fileprivate static func unstash(_ c_ptr: OpaquePointer?) -> Sprite {
+    static func unstash(_ c_ptr: OpaquePointer?) -> Sprite {
         let p = Sprite.c_sprite.getUserdata(c_ptr)!
         return Unmanaged<Sprite>.fromOpaque(p).takeUnretainedValue()
     }
+
 }
 
 private func updateGlue(c_ptr: OpaquePointer?) {
@@ -181,6 +203,17 @@ private func updateGlue(c_ptr: OpaquePointer?) {
 private func drawGlue(c_ptr: OpaquePointer?, bounds: PDRect, drawrect: PDRect) {
     let sprite = Sprite.unstash(c_ptr)
     sprite.drawFunction(sprite, Rect(cRect: bounds), Rect(cRect: drawrect))
+}
+
+private func collisionResponseGlue(c_ptr: OpaquePointer?, other_c_ptr: OpaquePointer?) -> SpriteCollisionResponseType {
+    let sprite = Sprite.unstash(c_ptr)
+    let other = Sprite.unstash(other_c_ptr)
+    if let f = sprite.collisionResponseFunction {
+        return SpriteCollisionResponseType(f(sprite, other).rawValue)
+    }
+    else {
+        return kCollisionTypeSlide  // 🤷
+    }
 }
 
 extension Sprite: Hashable {
