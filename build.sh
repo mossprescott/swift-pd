@@ -21,6 +21,7 @@ cp -r "$SDK"/pd_api* $ROOT/swift-pd/Sources/CPlaydate/
 swift build
 
 # Run pdc to convert/assemble any required assets:
+echo "Assembling app assets with pdc $(pdc --version)"
 touch Sources/Resources/pdex.bin
 pdc Sources/Resources "$APP_NAME"
 rm Sources/Resources/pdex.bin
@@ -29,4 +30,6 @@ rm "${APP_NAME}.pdx/pdex.bin"
 # Copy the game library into place:
 cp "${BUILD_DIR}/lib${APP_NAME}.dylib" "${APP_NAME}.pdx/pdex.dylib"
 
-ls -l "${APP_NAME}.pdx"
+# ls -lh "${APP_NAME}.pdx"
+
+echo "done: ${APP_NAME}.pdx"
