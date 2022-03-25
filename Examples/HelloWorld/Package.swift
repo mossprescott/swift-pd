@@ -11,7 +11,7 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(name: "swift-pd", path: "../../swift")
+    .package(name: "swift-pd", path: "../../swift-pd")
   ],
   targets: [
     .target(

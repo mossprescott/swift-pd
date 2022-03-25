@@ -15,7 +15,7 @@ APP_NAME=$(swift package describe | head -1 | cut -w -f 2)
 
 # Hackishly copy the API headers into the library's source dir because I don't know to get SPM
 # to refer to them from the include path:
-cp -r "$SDK"/pd_api* $ROOT/swift/Sources/CPlaydate/
+cp -r "$SDK"/pd_api* $ROOT/swift-pd/Sources/CPlaydate/
 
 # Compile and link the game (and the Playdate library along with it):
 swift build
