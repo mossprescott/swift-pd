@@ -34,10 +34,11 @@ struct SpriteGame: App {
     }
 
     func checkButtons() {
-    	let buttons = System.getButtonState()
-    	if buttons.pushed.contains(.a) || buttons.pushed.contains(.b) {
-    		player.fire();
-    	}
+        let buttons = System.getButtonState()
+        // Note: modified from the original; B for continuous fire
+        if buttons.pushed.contains(.a) || buttons.current.contains(.b) {
+            player.fire();
+        }
     }
 
     mutating func update() -> Bool {
