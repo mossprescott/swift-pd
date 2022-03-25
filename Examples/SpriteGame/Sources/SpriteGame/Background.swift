@@ -13,7 +13,7 @@ enum Background {
         sprite.setDrawFunction { _, _ in draw() }
 
         sprite.bounds = Rect(x: 0, y: 0, width: 400, height: 240)
-        sprite.setZIndex(0)
+        sprite.zIndex = 0
 
         Sprite.add(sprite)
     }
