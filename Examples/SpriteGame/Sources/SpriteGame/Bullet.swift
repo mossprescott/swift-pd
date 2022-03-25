@@ -5,7 +5,7 @@ import Playdate
 enum Bullet {
     /// "playerFire"
     static func spawn(x: Float, y: Float) {
-        let bullet = Sprite();
+        let bullet = Sprite()
 
         bullet.setUpdateFunction(update)
 
