@@ -52,45 +52,7 @@ class Player {
     }
 
     func fire() {
-        let bullet = Sprite();
-
-        bullet.setUpdateFunction(updateBullet)
-
-        // TODO: preload
-        guard let bulletImage = try? Graphics.Bitmap(path: "images/doubleBullet") else {
-            fatalError()
-        }
-
-        let w = bulletImage.width
-        let bulletHeight = bulletImage.height
-
-        bullet.setImage(bulletImage)
-
-        bullet.collideRect = Rect(x: 0, y: 0, width: Float(w), height: Float(bulletHeight))
-
-        // pd->sprite->setCollisionResponseFunction(bullet, playerFireCollisionResponse);
-
         let bounds = plane.bounds
-
-        bullet.moveTo(x: bounds.x + bounds.width/2 - Float(w)/2, y: bounds.y)
-        bullet.zIndex = 999
-        Sprite.add(bullet)
-
-        bullet.tag = SpriteType.playerBullet.rawValue
-    }
-
-    /// "updatePlayerFire"
-    func updateBullet(bullet: Sprite) {
-        let (x, y) = bullet.position
-        let newY = y - 20
-
-        if let h = bullet.getImage()?.height, newY < Float(-h) {
-            Sprite.remove(bullet)
-        }
-        else {
-            bullet.moveTo(x: x, y: newY)  // TODO moveWithCollisions
-
-            // ...
-        }
+        Bullet.spawn(x: bounds.x + bounds.width/2, y: bounds.y)
     }
 }
