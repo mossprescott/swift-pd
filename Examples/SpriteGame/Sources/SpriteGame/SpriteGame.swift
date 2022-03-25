@@ -19,18 +19,18 @@ struct SpriteGame: App {
 
     // cranking the crank changes the maximum number of enemy planes allowed
     mutating func checkCrank() {
-    	let change = System.getCrankChange()
+        let change = System.getCrankChange()
 
-    	if change > 1 {
-    		maxEnemies += 1;
-    		if maxEnemies > 119 { maxEnemies = 119 }
-    		System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
-    	}
+        if change > 1 {
+            maxEnemies += 1;
+            if maxEnemies > 119 { maxEnemies = 119 }
+            System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
+        }
         else if change < -1  {
-    		maxEnemies -= 1;
-    		if maxEnemies < 0 { maxEnemies = 0 }
-    		System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
-    	}
+            maxEnemies -= 1;
+            if maxEnemies < 0 { maxEnemies = 0 }
+            System.logToConsole("Maximum number of enemy planes: \(maxEnemies)")
+        }
     }
 
     func checkButtons() {
