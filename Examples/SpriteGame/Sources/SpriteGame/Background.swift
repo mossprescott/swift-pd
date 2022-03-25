@@ -18,16 +18,21 @@ enum Background {
         Sprite.add(sprite)
     }
 
-    static func update() {
+    private static func update() {
         y += 1
         if y > image.height {
             y = 0
         }
 
+        // Note: this sprite moves every frame and draws the entire screen,
+        // So marking it dirty causes a full redraw every time. That means none
+        // of the other sprites actually need to call it.
+        // In fact, if each sprite tries to dirty itself, the wrong parts of the
+        // the screen get drawn. Hmm.
         sprite.markDirty()
     }
 
-    static func draw() {
+    private static func draw() {
         image.draw(x: 0, y: y)
         image.draw(x: 0, y: y-image.height)
     }
