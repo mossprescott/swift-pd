@@ -18,20 +18,24 @@ This repo implements the "Hello World" app from the SDK's C_API examples.
 
 ## Build
 
+Navigate to the directory containing one of the examples (or your own app) and run the build script:
+
 ```bash
-$ ./make.sh
+$ cd Examples/SpriteGame
+$ ../../build.sh
 ```
 
-This script runs `pdc` to assemble any images, fonts, etc. from the directory `source/`,
-into `HelloWorld.pdx` (which is actually a directory.)
+This script runs `swift build` to compile your app (along with the API wrappers, writing a .dylib and a bunch of other junk under `.build/`
 
-Then it invokes `swiftc` to compile `source/main.swift`, writing `pdex.dylib` into the same
-output directory.
+Then it runs `pdc` to assemble any images, fonts, etc. from the directory `Sources/Resources`,
+into (for example) `SpriteGame.pdx` (which is actually a directory.)
+
+Finally, it copies the app executable into the pdx and you should be ready to go.
 
 ## Run
 
 ```bash
-$ open HelloWorld.pdx
+$ open SpriteGame.pdx
 ```
 
 Or just double-click the .pdx icon.
@@ -41,6 +45,30 @@ simulator like this:
 ```bash
 $ ~/"Developer/PlaydateSDK/bin/Playdate Simulator.app/Contents/MacOS/Playdate Simulator" HelloWorld.pdx
 ```
+
+Or just use `System.logToConsole()` to send messages to the console window in the UI. Note: to
+ format messages, use Swift's string interpolation, not Lua's, for example
+ `System.logToConsole("This is cool: \(awesomeness > 0.80)")`.
+
+## Starting an app from scratch
+
+You just need a directory with these files:
+
+```
+./
+  Package.swift
+  Sources/
+    MyApp/
+      TheApp.swift
+    Resources/
+      pdxinfo
+```
+
+Take a look at [Examples/HelloWorld/](Examples/HelloWorld/) for the bare minumum you need to get
+going.
+
+Update the various target names and the relative path to the `swift-pd` package in your Package.swift.
+Then run `build.sh` from your directory.
 
 ## Caveats
 
@@ -54,9 +82,11 @@ or just crash.
 There are probably lots of Swift language/library features that won't work at all.
 And lots that will work in the Simulator but don't really make sense for the device.
 
-Only a tiny portion the the Playdate API is currently wrapped in nice Swift syntax. To do
-anything very useful, we'll need at least the graphics/image and input APIs.
-You can access everything via `Playdate.c_api`, but the types get pretty ugly.
+Only a portion the the Playdate API is currently wrapped in nice Swift syntax, including basic
+input and drawing, and sprites. Additional APIs are often easy to add, but it can be tedious.
+With the current structure, you can't talk directly to the raw C APIs from your app, but you
+have the library source, so feel free to add what you need and submit a PR if you're feeling like
+sharing.
 
 This might actually work on an Intel Mac, or on Linux or Windows, with some changes. If you try
 it and get somewhere, submit a PR.
