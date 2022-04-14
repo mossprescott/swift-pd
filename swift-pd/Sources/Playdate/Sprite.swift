@@ -84,11 +84,14 @@ public class Sprite {
         // Worse, if someone else still has a reference to the (Swift) Bitmap and tries to
         // use it, is it already freed underneath?
         // At a minimum, maybe need to release the old image when a new one arrives?
-        let _ = Unmanaged.passRetained(image)
+        // let _ = Unmanaged.passRetained(image)
 
-        Sprite.c_sprite.setImage(c_ptr, image.c_bitmap, LCDBitmapFlip(flip.rawValue))
+        // Retain a reference to the old image until after the (C) Sprite no longer refers to it:
+        withExtendedLifetime(self.image) {
+            self.image = image
 
-        self.image = image
+            Sprite.c_sprite.setImage(c_ptr, image.c_bitmap, LCDBitmapFlip(flip.rawValue))
+        }
     }
 
     /// Might as well expose this, since we're holding onto it in order to keep it from being
