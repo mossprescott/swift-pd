@@ -23,15 +23,17 @@ public enum Graphics {
     }
 
     public class Bitmap {
-        let c_bitmap: OpaquePointer?
+        let c_bitmap: OpaquePointer
 
-        public init(x: Int, y: Int, bgColor: Color) {
-            c_bitmap = c_gfx.newBitmap(Int32(x), Int32(y), bgColor.rawValue)
+        public init(x: Int, y: Int, bgColor: Color) throws {
+            let ptr = c_gfx.newBitmap(Int32(x), Int32(y), bgColor.rawValue)
+            c_bitmap = try checkResult(ptr, nil)
         }
 
         public init(path: String) throws {
             var err: UnsafePointer<CChar>? = nil
-            c_bitmap = c_gfx.loadBitmap(path, &err)
+            let ptr = c_gfx.loadBitmap(path, &err)
+            c_bitmap = try checkResult(ptr, err)
         }
 
         public var width: Int {
@@ -58,18 +60,18 @@ public enum Graphics {
     }
 
     public class Font {
-        var c_font: OpaquePointer?
+        var c_font: OpaquePointer
 
         public init(path: String) throws {
             var err: UnsafePointer<CChar>? = nil
-            c_font = c_gfx.loadFont(path, &err)
-            try checkError(err)
+            let ptr = c_gfx.loadFont(path, &err)
+            c_font = try checkResult(ptr, err)
         }
 
-        // TODO: do Fonts need to be freed? it's unclear from the docs
-        // deinit {
-
-        // }
+        deinit {
+            // There's no API to free Font instances; this seems to eliminate any leakage:
+            let _ = System.realloc(ptr: UnsafeMutableRawPointer(c_font), size: 0)
+        }
     }
 
 

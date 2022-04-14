@@ -71,24 +71,13 @@ public class Sprite {
         Sprite.c_sprite.moveBy(c_ptr, dx, dy)
     }
 
-    /// Warning: once a Bitmap has been associated with a Sprite, it might or might not be safe to
-    /// use the Bitmap elsewhere. More research is needed.
     public func setImage(_ image: Graphics.Bitmap, flip: Flip = .unflipped) {
-        // Tricky: it looks like the C sprite takes ownership of the bitmap, and will free it when
-        // necessary (e.g when the sprite itself is freed or when a new image is set.) But our
-        // Swift wrapper is also going to free the Bitmap as soon as the reference here is
-        // pointed to a new object. Therefore we do some hackish manual refcount updating.
-        // This is probably not the approved technique.
-        // At best, this is leaking the (Swift) Bitmap instance that's still holding onto a
-        // pointer to the (C) Bitmap that will eventually be freed out from under it.
-        // Worse, if someone else still has a reference to the (Swift) Bitmap and tries to
-        // use it, is it already freed underneath?
-        // At a minimum, maybe need to release the old image when a new one arrives?
-        let _ = Unmanaged.passRetained(image)
+        // Retain a reference to the old image until after the (C) Sprite no longer refers to it:
+        withExtendedLifetime(self.image) {
+            self.image = image
 
-        Sprite.c_sprite.setImage(c_ptr, image.c_bitmap, LCDBitmapFlip(flip.rawValue))
-
-        self.image = image
+            Sprite.c_sprite.setImage(c_ptr, image.c_bitmap, LCDBitmapFlip(flip.rawValue))
+        }
     }
 
     /// Might as well expose this, since we're holding onto it in order to keep it from being

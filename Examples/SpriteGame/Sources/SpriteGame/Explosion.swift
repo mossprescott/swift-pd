@@ -7,7 +7,7 @@ public enum Explosion {
 
         sprite.setUpdateFunction(update)
 
-        sprite.setImage(loadImage(0))
+        sprite.setImage(loadImage(1))
 
         sprite.moveTo(x: x, y: y)
 
@@ -21,7 +21,7 @@ public enum Explosion {
     private static func update(sprite: Sprite) {
         let frameNumber = sprite.tag + 1
 
-        if frameNumber > 7 {
+        if frameNumber > 8 {
             Sprite.remove(sprite)
         }
         else {
